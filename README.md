@@ -2,6 +2,14 @@
 
 Generic enterprise workflow demo with JWT auth, RBAC, approval transitions, audit logs, dashboard counts, and CSV export. **Synthetic demo only** — no employer-specific data.
 
+[![Tests](https://github.com/dawit-Tegegnwork/enterprise-workflow-management-system/actions/workflows/test.yml/badge.svg)](https://github.com/dawit-Tegegnwork/enterprise-workflow-management-system/actions/workflows/test.yml)
+
+**Requirements:** Python 3.12+
+
+## Screenshot
+
+![OpenAPI docs](docs/screenshots/swagger.png)
+
 ## Demo accounts
 
 | Email | Password | Role |
@@ -32,6 +40,13 @@ docker compose up --build
 ```bash
 pytest -q
 ```
+
+## Try live / Run locally
+
+| | |
+|---|---|
+| **Live demo** | [Deploy to Render](docs/RENDER_DEPLOY.md) (free tier) |
+| **Local** | `docker compose up --build` → http://127.0.0.1:8001/docs |
 
 ## This project demonstrates
 

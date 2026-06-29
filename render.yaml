@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: enterprise-workflow-management-system
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: WORKFLOW_DATABASE_URL
+        value: sqlite:////tmp/workflow.db
+      - key: WORKFLOW_SECRET_KEY
+        generateValue: true
