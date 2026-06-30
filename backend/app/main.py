@@ -93,11 +93,15 @@ def landing_page():
         "Production-style portfolio API — JWT, RBAC, approvals, audit trail, CSV export.",
         "No employer or production workflow data. Demo accounts and requests only.",
         "enterprise-workflow-management-system",
+        extra_links=[
+            ("/dashboard", "Workflow dashboard"),
+            ("/docs", "API docs"),
+        ],
         quick_steps=[
             'Check <a href="/health">/health</a>',
-            'Open <a href="/docs">/docs</a> and login as <code>staff@demo.local</code> / <code>Demo123!</code>',
-            "<code>GET /api/v1/requests</code> — view seeded workflow requests",
-            "Login as <code>manager@demo.local</code> and approve a submitted request",
+            'Open <a href="/dashboard">/dashboard</a> — seeded approval requests',
+            'Login in <a href="/docs">/docs</a> as <code>staff@demo.local</code> / <code>Demo123!</code>',
+            "Manager approves via <code>POST /api/v1/requests/{id}/transition</code>",
         ],
     )
 
@@ -276,6 +280,77 @@ def dashboard_summary(session: Session = Depends(get_session), user: User = Depe
             select(func.count()).select_from(WorkflowRequest).where(WorkflowRequest.status == status)
         ).one()
     return {"counts_by_status": counts, "viewer_role": user.role.value}
+
+
+@app.get("/api/v1/demo/summary")
+def demo_summary(session: Session = Depends(get_session)):
+    counts = {}
+    for status in RequestStatus:
+        counts[status.value] = session.exec(
+            select(func.count()).select_from(WorkflowRequest).where(WorkflowRequest.status == status)
+        ).one()
+    total = session.exec(select(func.count()).select_from(WorkflowRequest)).one()
+    return {"counts_by_status": counts, "total": total}
+
+
+@app.get("/api/v1/demo/requests")
+def demo_requests(session: Session = Depends(get_session)):
+    rows = session.exec(select(WorkflowRequest).order_by(WorkflowRequest.created_at.desc()).limit(10)).all()
+    return [_request_payload(row) for row in rows]
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard_page():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Enterprise Workflow Dashboard</title>
+      <style>
+        body { font-family: system-ui, sans-serif; margin: 0; background: #FBF7F0; color: #0E2A3B; }
+        .banner { background: #ecfdf5; border-bottom: 1px solid #6ee7b7; color: #065f46; padding: 0.65rem 1.5rem; font-size: 0.85rem; }
+        main { max-width: 1000px; margin: 0 auto; padding: 1.75rem 1.25rem; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin: 1rem 0 1.5rem; }
+        .card { background: #fff; border: 1px solid #E8DFD0; border-radius: 12px; padding: 1rem; }
+        .card span { font-size: 0.7rem; text-transform: uppercase; color: #5B6B73; }
+        .card strong { display: block; font-size: 1.6rem; margin-top: 0.25rem; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #E8DFD0; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 0.75rem 1rem; border-bottom: 1px solid #E8DFD0; text-align: left; font-size: 0.88rem; }
+        th { background: #F8F3EA; font-size: 0.72rem; text-transform: uppercase; color: #5B6B73; }
+        .pill { padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; background: #F4ECDE; }
+        a { color: #0E9E8E; font-weight: 600; }
+      </style>
+    </head>
+    <body>
+      <div class="banner"><strong>Synthetic demo only.</strong> JWT-protected API — use demo accounts in /docs.</div>
+      <main>
+        <h1>Enterprise Workflow Dashboard</h1>
+        <p>Approval pipeline overview — seeded demo requests.</p>
+        <div class="cards" id="cards">Loading...</div>
+        <table>
+          <thead><tr><th>Title</th><th>Department</th><th>Status</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="3">Loading...</td></tr></tbody>
+        </table>
+        <p style="margin-top:1.25rem"><a href="/">Home</a> · <a href="/docs">API docs</a></p>
+      </main>
+      <script>
+        fetch('/api/v1/demo/summary').then(r => r.json()).then(d => {
+          const c = d.counts_by_status || {};
+          document.getElementById('cards').innerHTML = Object.entries(c).map(([k,v]) =>
+            `<div class="card"><span>${k.replace('_',' ')}</span><strong>${v}</strong></div>`
+          ).join('') + `<div class="card"><span>total</span><strong>${d.total ?? 0}</strong></div>`;
+        });
+        fetch('/api/v1/demo/requests').then(r => r.json()).then(rows => {
+          document.getElementById('rows').innerHTML = rows.map(r =>
+            `<tr><td>${r.title}</td><td>${r.department || '—'}</td><td><span class="pill">${r.status}</span></td></tr>`
+          ).join('');
+        });
+      </script>
+    </body>
+    </html>
+    """
 
 
 @app.get("/api/v1/audit")

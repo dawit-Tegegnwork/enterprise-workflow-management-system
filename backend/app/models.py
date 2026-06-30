@@ -96,7 +96,8 @@ class AuditLog(SQLModel, table=True):
     created_at: datetime = SQLField(default_factory=lambda: datetime.now(UTC))
 
 
-engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
+_connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+engine = create_engine(settings.database_url, connect_args=_connect_args)
 
 
 def init_db() -> None:

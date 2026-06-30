@@ -12,7 +12,8 @@ This is a **production-style portfolio project** using **synthetic data only**. 
 
 | Channel | URL |
 |---------|-----|
-| **Cloud live demo** | Coming soon — [one-click Render deploy](docs/RENDER_DEPLOY.md) |
+| **Cloud live demo** | https://enterprise-workflow-management-system.onrender.com/dashboard (free tier — cold start ~30s) |
+| **API docs** | https://enterprise-workflow-management-system.onrender.com/docs |
 | **Local** | `http://127.0.0.1:8001` after `docker compose up --build` |
 
 ## Quick Test in 3 Minutes
@@ -64,7 +65,7 @@ All users, requests, and audit events are **synthetic demo data**. No employer-s
 
 ## Screenshot
 
-![OpenAPI docs](docs/screenshots/swagger.png)
+![Dashboard](docs/screenshots/dashboard.png)
 
 ## Demo accounts
 
@@ -101,8 +102,8 @@ pytest -q
 
 | | |
 |---|---|
-| **Live demo** | [Deploy to Render](docs/RENDER_DEPLOY.md) (free tier) |
-| **Local** | `docker compose up --build` → http://127.0.0.1:8001/docs |
+| **Live demo** | https://enterprise-workflow-management-system.onrender.com/dashboard |
+| **Local** | `docker compose up --build` → http://127.0.0.1:8001/dashboard |
 
 ## This project demonstrates
 
