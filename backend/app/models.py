@@ -163,3 +163,38 @@ def seed_users(session: Session) -> None:
             )
         )
     session.commit()
+
+
+def seed_demo_requests(session: Session) -> None:
+    if session.exec(select(WorkflowRequest)).first():
+        return
+    staff = session.exec(select(User).where(User.email == "staff@demo.local")).first()
+    manager = session.exec(select(User).where(User.email == "manager@demo.local")).first()
+    if not staff or not manager:
+        return
+    samples = [
+        ("Laptop refresh request", "Synthetic equipment request for portfolio demo.", RequestStatus.SUBMITTED),
+        ("Travel approval — Q3 workshop", "Synthetic travel request awaiting manager decision.", RequestStatus.SUBMITTED),
+        ("Software license renewal", "Synthetic license renewal already approved in demo data.", RequestStatus.APPROVED),
+    ]
+    for title, description, status in samples:
+        req = WorkflowRequest(
+            title=title,
+            description=description,
+            requester_id=staff.id,
+            department="Operations",
+            status=status,
+        )
+        session.add(req)
+        session.commit()
+        session.refresh(req)
+        session.add(
+            StatusHistory(
+                request_id=req.id,
+                from_status=RequestStatus.DRAFT.value,
+                to_status=status.value,
+                actor_id=staff.id if status == RequestStatus.SUBMITTED else manager.id,
+                note="Seeded demo workflow",
+            )
+        )
+    session.commit()

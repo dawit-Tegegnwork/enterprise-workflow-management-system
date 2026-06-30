@@ -6,6 +6,14 @@ Generic enterprise workflow demo with JWT auth, RBAC, approval transitions, audi
 
 **Requirements:** Python 3.12+
 
+## Demo scenario (3–5 minutes)
+
+1. `docker compose up --build` — demo users and 3 workflow requests auto-seed
+2. Login as `staff@demo.local` / `Demo123!` at `/docs`
+3. `GET /api/v1/requests` — inspect seeded requests
+4. Login as `manager@demo.local` — approve a submitted request
+5. `GET /api/v1/requests/export.csv` with manager token
+
 ## Screenshot
 
 ![OpenAPI docs](docs/screenshots/swagger.png)

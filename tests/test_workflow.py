@@ -152,3 +152,32 @@ def test_auditor_cannot_approve() -> None:
         json={"action": "approve"},
     )
     assert denied.status_code == 403
+
+
+def test_list_requests_returns_seeded_demo() -> None:
+    manager_token = _login("manager@demo.local")
+    response = client.get(
+        "/api/v1/requests",
+        headers={"Authorization": f"Bearer {manager_token}"},
+    )
+    assert response.status_code == 200
+    items = response.json()
+    assert len(items) >= 3
+    assert any(item["status"] == "submitted" for item in items)
+
+
+def test_reject_from_draft_is_rejected() -> None:
+    staff_token = _login("staff@demo.local")
+    manager_token = _login("manager@demo.local")
+    create = client.post(
+        "/api/v1/requests",
+        headers={"Authorization": f"Bearer {staff_token}"},
+        json={"title": "Draft only", "description": "Synthetic", "department": "Ops"},
+    )
+    request_id = create.json()["id"]
+    denied = client.post(
+        f"/api/v1/requests/{request_id}/transition",
+        headers={"Authorization": f"Bearer {manager_token}"},
+        json={"action": "reject"},
+    )
+    assert denied.status_code == 400
