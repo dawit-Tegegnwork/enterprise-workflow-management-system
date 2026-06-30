@@ -5,7 +5,7 @@ from uuid import UUID
 
 import csv
 from fastapi import Depends, FastAPI, HTTPException, Header
-from fastapi.responses import StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from jose import JWTError, jwt
 from sqlmodel import Session, func, select
 
@@ -81,6 +81,55 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Enterprise Workflow Management System", version="0.1.0", lifespan=lifespan)
+
+
+@app.get("/", response_class=HTMLResponse)
+def landing_page():
+    return """
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Enterprise Workflow Management System</title>
+        <style>
+          body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0f172a; color: #e5e7eb; }
+          main { max-width: 980px; margin: 0 auto; padding: 56px 22px; }
+          .hero { border: 1px solid #334155; border-radius: 28px; padding: 38px; background: linear-gradient(135deg, #111827, #1e293b); box-shadow: 0 30px 80px rgba(0,0,0,.28); }
+          .kicker { color: #38bdf8; text-transform: uppercase; letter-spacing: .16em; font-size: 12px; font-weight: 700; }
+          h1 { margin: 12px 0; font-size: clamp(34px, 6vw, 64px); line-height: .98; letter-spacing: -.05em; }
+          p { color: #cbd5e1; line-height: 1.7; font-size: 17px; }
+          .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 24px; }
+          .card { border: 1px solid #334155; border-radius: 18px; padding: 18px; background: rgba(15, 23, 42, .78); }
+          .card strong { display: block; margin-bottom: 8px; color: #f8fafc; }
+          .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+          a { color: #0f172a; background: #38bdf8; padding: 12px 16px; border-radius: 999px; text-decoration: none; font-weight: 800; }
+          a.secondary { color: #e5e7eb; background: transparent; border: 1px solid #475569; }
+        </style>
+      </head>
+      <body>
+        <main>
+          <section class="hero">
+            <div class="kicker">Portfolio API demo</div>
+            <h1>Enterprise approval workflows with RBAC and audit trails.</h1>
+            <p>
+              A recruiter-readable backend project showing JWT login, role-based actions,
+              request approvals, status history, audit logging, dashboard summaries, and CSV export.
+            </p>
+            <div class="grid">
+              <div class="card"><strong>Roles</strong>Admin, manager, staff, and auditor permissions.</div>
+              <div class="card"><strong>Workflow</strong>Draft, submitted, approved, rejected, and changes requested.</div>
+              <div class="card"><strong>Evidence</strong>Tests, Docker setup, API examples, and documentation.</div>
+            </div>
+            <div class="actions">
+              <a href="/docs">Open API docs</a>
+              <a class="secondary" href="/api/v1/requests/export.csv">CSV export endpoint</a>
+            </div>
+          </section>
+        </main>
+      </body>
+    </html>
+    """
 
 
 @app.get("/health")
