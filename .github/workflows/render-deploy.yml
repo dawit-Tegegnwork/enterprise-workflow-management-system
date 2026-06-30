@@ -1,0 +1,24 @@
+name: Deploy to Render
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - render.yaml
+      - .github/workflows/render-deploy.yml
+
+jobs:
+  deploy:
+    if: ${{ secrets.RENDER_API_KEY != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Blueprint
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          curl -sf -X POST "https://api.render.com/v1/blueprints" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"${{ github.event.repository.name }}\",\"repo\":\"https://github.com/${{ github.repository }}\",\"branch\":\"${BRANCH}\",\"autoDeploy\":\"yes\"}"
